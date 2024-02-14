@@ -2,7 +2,7 @@
 .idea
 *.log
 tmp/
-
+test/
 *.py[cod]
 *.egg
 build
