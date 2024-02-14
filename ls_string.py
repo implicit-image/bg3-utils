@@ -3,7 +3,8 @@ from utils import intersperse
 
 class LSString:
 
-    def __init__(self, string: str):
+    def __init__(self, string: str | None):
+        if string is None: return None
         self.tokens = string.split(";")
         expressions = {}
         for expr in self.tokens:
@@ -29,17 +30,35 @@ class LSString:
         print(expressions)
         self.expressions = expressions
 
+    def __getitem__(self, item):
+        return self.expressions[item]
 
+    def __setitem__(self, item, value):
+        self.expressions[item] = value
+
+    # TODO: implement this properly
+    def __add__(self, other):
+        one = str(self)
+        other = str(other)
+        result = LSString(one + ";" + other)
+        return result
 
     def __str__(self):
         result = []
         for expr_type, expr_func in self.expressions.items():
+            print(f"EXPR TYPE: {expr_type}")
+            print(f"EXPR FUNC: {expr_func}")
+            if type(expr_func) is not dict or type(expr_func) is not list:
+                result.append(f"{expr_type}({expr_func})")
+                continue
             for func, params in expr_func.items():
+                print(f"FUNC: {func}")
                 # SavingThrow, [['Charisma'], ['Dexterity']
                 if len(params) == 0:
-                    expr_str = expr_type + "(" + func + ")"
+                    expr_str = f"{expr_type}({func})"
                     result.append(expr_str)
                 else:
+                    print(f"PARAMS: {params}")
                     for param_table in params:
                         # ['Charisma']
                         if len(param_table) >= 1:
@@ -52,7 +71,13 @@ class LSString:
         return "".join(intersperse(result, ";"))
 
 
-l = "ActionResource(BardicInspiration,3,0);ActionResource(SpellSlot,4,1);ProficiencyBonus(SavingThrow,Dexterity);ProficiencyBonus(SavingThrow,Charisma);Proficiency(LightArmor);Proficiency(SimpleWeapons);Proficiency(HandCrossbows);Proficiency(Longswords);Proficiency(Rapiers);Proficiency(Shortswords);Proficiency(MusicalInstrument);Attribute(UseMusicalInstrumentForCasting)"
-string = LSString("ActionResource(BardicInspiration,3,0);ActionResource(SpellSlot,4,1);ProficiencyBonus(SavingThrow,Dexterity);ProficiencyBonus(SavingThrow,Charisma);Proficiency(LightArmor);Proficiency(SimpleWeapons);Proficiency(HandCrossbows);Proficiency(Longswords);Proficiency(Rapiers);Proficiency(Shortswords);Proficiency(MusicalInstrument);Attribute(UseMusicalInstrumentForCasting)")
-print(string)
-print(str(string) == l)
+
+# l = "ActionResource(BardicInspiration,3,0);ActionResource(SpellSlot,4,1);\
+# ProficiencyBonus(SavingThrow,Dexterity);ProficiencyBonus(SavingThrow,Charisma)\
+# ;Proficiency(LightArmor);Proficiency(SimpleWeapons);Proficiency(HandCrossbows);Proficiency(Longswords);Proficiency(Rapiers);Proficiency(Shortswords);Proficiency(MusicalInstrument);Attribute(UseMusicalInstrumentForCasting)"
+# string = LSString("ActionResource(BardicInspiration,3,0);ActionResource(SpellSlot,4,1);ProficiencyBonus(SavingThrow,Dexterity);ProficiencyBonus(SavingThrow,Charisma);Proficiency(LightArmor);Proficiency(SimpleWeapons);Proficiency(HandCrossbows);Proficiency(Longswords);Proficiency(Rapiers);Proficiency(Shortswords);Proficiency(MusicalInstrument);Attribute(UseMusicalInstrumentForCasting)")
+# print(string)
+# print(str(string) == l)
+# print(string["ActionResource"])
+# string["ActionResource"]["SpellSlot"] = [['7', '0']]
+# print(string)
